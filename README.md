@@ -164,6 +164,9 @@ The project is licensed under the MIT License.
 
 ### Unreleased
 
+- SECURITY: Update `tornado` based on CVE-2025-47287 (high severity).
+- Convert to new pyproject.toml project keywords based on updated poetry version.
+
 ### 0.4.4 - 2025-01-13
 
 - SECURITY: Update `virtualenv` based on CVE-2024-53899 (high severity).
