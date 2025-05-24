@@ -158,7 +158,7 @@ BUILD = [
 _clean				= "rm -rf build *.egg-info"
 _pre_commit			= "pre-commit run --all-files"
 _poetry_lock_check	= "poetry check --lock"
-_poetry_lock_update	= "poetry lock --no-update"
+_poetry_lock_update	= "poetry lock"
 _poetry_build		= "poetry build"
 
 #-------------------------------------------------------------------------------
