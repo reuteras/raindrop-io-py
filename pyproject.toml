@@ -4,7 +4,7 @@
 
 [project]
 name = "raindrop-io-py"
-version = "0.4.5"
+version = "0.4.6"
 description = "API for Raindrop.io bookmark manager"
 authors = [{name="Peter Borocz <peter.borocz+raindrop-io-py@google.com>"}]
 classifiers = ['License :: OSI Approved :: MIT License', 'Programming Language :: Python :: 3']
@@ -155,8 +155,8 @@ BUILD = [
   "_poetry_lock_update",
   "_poetry_build",
 ]
-_clean				= "rm -rf build *.egg-info"
-_pre_commit			= "pre-commit run --all-files"
+_clean			= "rm -rf build *.egg-info"
+_pre_commit		= "pre-commit run --all-files"
 _poetry_lock_check	= "poetry check --lock"
 _poetry_lock_update	= "poetry lock"
 _poetry_build		= "poetry build"

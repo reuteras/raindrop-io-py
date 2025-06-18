@@ -164,6 +164,8 @@ The project is licensed under the MIT License.
 
 ### Unreleased
 
+- SECURITY: Update `requests` based on CVE-2024-47081 (moderate severity)
+- SECURITY: Update `jinja2` based on CVE-2025-27516 (moderate severity)
 - SECURITY: Update `tornado` based on CVE-2025-47287 (high severity).
 - Convert to new pyproject.toml project keywords based on updated poetry version.
 
