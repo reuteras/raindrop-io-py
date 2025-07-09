@@ -156,7 +156,7 @@ We use [Sphinx](https://www.sphinx-doc.org/en/master/index.html) with [Google-st
 
 [python-raindropio](https://github.com/atsuoishimoto/python-raindropio) from [Atsuo Ishimoto](https://github.com/atsuoishimoto).
 
-## License Foo
+## License
 
 The project is licensed under the MIT License.
 
@@ -164,6 +164,11 @@ The project is licensed under the MIT License.
 
 ### Unreleased
 
+### 0.4.6 - 2025-07-09
+
+- SECURITY: Update `urllib` based on CVE-2025-50181 & CVE-2025-50182 (both moderate severity)
+
+### 0.4.5 - 2025-08-18
 - SECURITY: Update `requests` based on CVE-2024-47081 (moderate severity)
 - SECURITY: Update `jinja2` based on CVE-2025-27516 (moderate severity)
 - SECURITY: Update `tornado` based on CVE-2025-47287 (high severity).
