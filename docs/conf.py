@@ -10,7 +10,6 @@ sys.path.insert(0, os.path.abspath("."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "RaindropIOPY"
-copyright = "2023, Peter Borocz"
 author = "Peter Borocz"
 
 # -- General configuration ---------------------------------------------------

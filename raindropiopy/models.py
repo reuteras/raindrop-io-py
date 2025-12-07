@@ -540,7 +540,7 @@ class SystemCollection(BaseModel):
     count: NonNegativeInt
     title: str | None
 
-    @root_validator(pre=False)
+    @root_validator(pre=False, skip_on_failure=True)
     def _validator(cls, values):  # noqa: N805
         """Map the hard-coded id's of the System Collections to the descriptions used on the UI."""
         _titles = {
