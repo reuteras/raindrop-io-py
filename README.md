@@ -164,6 +164,12 @@ The project is licensed under the MIT License.
 
 ### Unreleased
 
+### 0.4.7 - 2025-12-07
+
+- SECURITY: Update `urllib3` to 2.6 based on CVE-2025-66471 (high severity).
+
+- PACKAGING: Moved from poetry to uv. Not sure what impact this'll have on downstream usage though (but had to do so as my brain doesn't work on poetry anymore ;-)
+
 ### 0.4.6 - 2025-07-09
 
 - SECURITY: Update `urllib` based on CVE-2025-50181 & CVE-2025-50182 (both moderate severity)
