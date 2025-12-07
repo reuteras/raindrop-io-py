@@ -109,8 +109,6 @@ where = ["."]
 include = ["raindropiopy*"]
 
 [build-system]
-# requires = ["poetry-core>=1.0.0", "setuptools"]
-# build-backend = "poetry.core.masonry.api"
 requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -127,7 +125,6 @@ NOX = "nox --reuse-venv yes"
 # 1: Version update (aka "bump")
 #-------------------------------------------------------------------------------
 VERSION = [
-  "_poetry_version",
   "_update_readme_version",
   "_git_add_version",
   "_git_commit",
@@ -142,15 +139,11 @@ _git_commit	       = "git commit -m 'Bump step commit (from poe)'"
 BUILD = [
   "_clean",
   "_pre_commit",
-  "_poetry_lock_check",
-  "_poetry_lock_update",
-  "_poetry_build",
+  "_uv_build",
 ]
-_clean		    = "rm -rf build *.egg-info"
-_pre_commit	    = "pre-commit run --all-files"
-_poetry_lock_check  = "poetry check --lock"
-_poetry_lock_update = "poetry lock"
-_poetry_build	    = "poetry build"
+_clean	    = "rm -rf build dist *.egg-info"
+_pre_commit = "pre-commit run --all-files"
+_uv_build   = "uv build"
 
 #-------------------------------------------------------------------------------
 # 3: Release
@@ -162,15 +155,7 @@ RELEASE	= [
   "_git_create_release",
 ]
 _git_push_to_github = "git push --follow-tags"
-_publish_to_pypi    = "poetry publish"
-
-[tool.poe.tasks._poetry_version]
-shell = "poetry version $bump_level"
-
-[[tool.poe.tasks._poetry_version.args]]
-  name    = "bump_level"
-  help    = "The semantic version to push new version to, eg. patch, minor, major etc."
-  default = "patch"
+_publish_to_pypi    = "uv publish"
 
 [tool.poe.tasks._git_create_tag]
 interpreter = "fish"
