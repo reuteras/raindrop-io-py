@@ -59,7 +59,7 @@ def test_get() -> None:
             1,
             tzinfo=datetime.timezone.utc,
         )
-        assert c.link == "https://www.example.com/"
+        assert str(c.link) == "https://www.example.com/"
         assert c.media == []
         assert c.tags == ["abc", "def"]
         assert c.title == "title"
