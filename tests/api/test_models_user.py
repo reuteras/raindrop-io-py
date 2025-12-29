@@ -39,7 +39,7 @@ test_user = {
     "pro": True,
     "proExpire": "2022-01-01T01:01:01.000Z",
     "provider": "twitter",
-    "registered": "2020-01-02T01:1:1.0Z",
+    "registered": "2020-01-02T01:01:01.0Z",
 }
 
 

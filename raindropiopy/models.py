@@ -22,8 +22,8 @@ from pydantic import (
     HttpUrl,
     NonNegativeInt,
     PositiveInt,
-    root_validator,
-    validator,
+    field_validator,
+    model_validator,
 )
 
 from .api import T_API  # ie. for typing only...
@@ -58,7 +58,7 @@ def _collect_other_attributes(cls, v):
     skip_attrs = "_id"  # We don't need to store alias attributes again (pydantic will take care of)
     v["other"] = dict()
     for attr, value in v.items():
-        if value and attr not in cls.__fields__ and attr not in skip_attrs:
+        if value and attr not in cls.model_fields and attr not in skip_attrs:
             v["other"][attr] = value
     return v
 
@@ -164,7 +164,7 @@ class CollectionRef(BaseModel):
 
     """
 
-    id: int = Field(None, alias="$id")
+    id: int | None = Field(None, alias="$id")
 
 
 # We define the 3 "system" collections in the Raindrop environment:
@@ -178,8 +178,8 @@ CollectionRef.Unsorted = CollectionRef(**{"$id": -1})
 class UserRef(BaseModel):
     """Represents a **reference** to `User` object."""
 
-    id: int = Field(None, alias="$id")
-    ref: str = Field(None, alias="$user")
+    id: int | None = Field(None, alias="$id")
+    ref: str | None = Field(None, alias="$user")
 
 
 class Access(BaseModel):
@@ -215,34 +215,36 @@ class Collection(BaseModel):
         Attributes in `other` are *NOT* OFFICIALLY SUPPORTED...use at your own risk!
     """
 
-    id: int = Field(None, alias="_id")
+    id: int | None = Field(None, alias="_id")
     title: str
     user: UserRef
 
-    access: Access | None
+    access: Access | None = None
     collaborators: list[Any] | None = Field(default_factory=list)
     color: str | None = None
     count: NonNegativeInt
     cover: list[str] | None = Field(default_factory=list)
-    created: datetime | None
+    created: datetime | None = None
     expanded: bool = False
-    last_update: datetime | None
-    parent: int | None  # Id of parent collection (if any)
-    public: bool | None
-    sort: int | None
-    view: View | None
+    last_update: datetime | None = None
+    parent: int | None = None  # Id of parent collection (if any)
+    public: bool | None = None
+    sort: int | None = None
+    view: View | None = None
 
     # Per API Doc: "Our API response could contain other fields, not described above.
     # It's unsafe to use them in your integration! They could be removed or renamed at any time."
     other: dict[str, Any] = {}
 
     # Used to convert parent reference's of sub-collections to simply id's of the respective parent collection.
-    _extract_parent_id = validator("parent", pre=True, allow_reuse=True)(
-        _resolve_parent_reference,
-    )
+    @field_validator("parent", mode="before")
+    @classmethod
+    def _extract_parent_id(cls, v):  # noqa: N805
+        """Convert parent reference to parent ID."""
+        return _resolve_parent_reference(v)
 
-    @root_validator(pre=True)
-    # FIXME: noqa here is because work-around in https://github.com/pydantic/pydantic/issues/568 doesn't work!
+    @model_validator(mode="before")
+    @classmethod
     def _validator(cls, v):  # noqa: N805
         """Gather all non-recognised/unofficial attributes into a single attribute."""
         return _collect_other_attributes(cls, v)
@@ -459,7 +461,7 @@ class Group(BaseModel):
     title: str
     hidden: bool
     sort: NonNegativeInt
-    collectionids: list[int] = Field(None, alias="collections")
+    collectionids: list[int] | None = Field(None, alias="collections")
 
 
 class UserConfig(BaseModel):
@@ -469,7 +471,7 @@ class UserConfig(BaseModel):
         Attributes in `other` are NOT OFFICIALLY SUPPORTED!.
     """
 
-    broken_level: BrokenLevel = None
+    broken_level: BrokenLevel | None = None
     font_color: FontColor | None = None
     font_size: int | None = None
     lang: str | None = None
@@ -481,12 +483,14 @@ class UserConfig(BaseModel):
     # It's unsafe to use them in your integration! They could be removed or renamed at any time."
     other: dict[str, Any] = {}
 
-    @validator("last_collection", pre=True)
+    @field_validator("last_collection", mode="before")
+    @classmethod
     def cast_last_collection_to_ref(cls, v):  # noqa: N805
         """Cast last_collection provided as a raw int to a valid CollectionRef."""
         return CollectionRef(**{"$id": v})
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _validator_other_attributes(cls, v):  # noqa: N805
         """Gather all non-recognised/unofficial attributes into a single attribute."""
         return _collect_other_attributes(cls, v)
@@ -497,17 +501,17 @@ class UserFiles(BaseModel):
 
     used: int
     size: PositiveInt
-    last_checkpoint: datetime = Field(None, alias="lastCheckpoint")
+    last_checkpoint: datetime | None = Field(None, alias="lastCheckpoint")
 
 
 class User(BaseModel):
     """Raindrop User model."""
 
-    id: int = Field(None, alias="_id")
+    id: int | None = Field(None, alias="_id")
     email: EmailStr
     email_md5: str | None = Field(None, alias="email_MD5")
     files: UserFiles
-    full_name: str = Field(None, alias="fullName")
+    full_name: str | None = Field(None, alias="fullName")
     groups: list[Group]
     password: bool
     pro: bool
@@ -536,20 +540,20 @@ class SystemCollection(BaseModel):
     a small set of simple "status" calls available from the Raindrop.io API, specifically `get_counts` and `get_meta`.
     """
 
-    id: int = Field(None, alias="_id")
+    id: int | None = Field(None, alias="_id")
     count: NonNegativeInt
-    title: str | None
+    title: str | None = None
 
-    @root_validator(pre=False, skip_on_failure=True)
-    def _validator(cls, values):  # noqa: N805
+    @model_validator(mode="after")
+    def _validator(self):  # noqa: N805
         """Map the hard-coded id's of the System Collections to the descriptions used on the UI."""
         _titles = {
             CollectionRef.Unsorted.id: "Unsorted",
             CollectionRef.All.id: "All",
             CollectionRef.Trash.id: "Trash",
         }
-        values["title"] = _titles.get(values["id"])
-        return values
+        self.title = _titles.get(self.id)
+        return self
 
     @classmethod
     def get_counts(cls, api: T_API) -> list[Collection]:
@@ -626,31 +630,32 @@ class Raindrop(BaseModel):
     """
 
     # "Main" fields (per https://developer.raindrop.io/v1/raindrops)
-    id: int = Field(None, alias="_id")
+    id: int | None = Field(None, alias="_id")
     collection: Collection | CollectionRef = CollectionRef.Unsorted
-    cover: str | None
-    created: datetime | None
-    domain: str | None
-    excerpt: str | None  # aka 'Description' on the Raindrop UI.
-    file: File | None
+    cover: str | None = None
+    created: datetime | None = None
+    domain: str | None = None
+    excerpt: str | None = None  # aka 'Description' on the Raindrop UI.
+    file: File | None = None
     last_update: datetime | None = Field(None, alias="lastUpdate")
-    link: HttpUrl | None
-    media: list[dict[str, Any]] | None
-    tags: list[str] | None
-    title: str | None
-    type: RaindropType | None
-    user: UserRef | None
+    link: HttpUrl | None = None
+    media: list[dict[str, Any]] | None = None
+    tags: list[str] | None = None
+    title: str | None = None
+    type: RaindropType | None = None
+    user: UserRef | None = None
 
     # "Other" fields:
-    broken: bool | None
-    cache: Cache | None
-    important: bool | None  # aka marked as Favorite.
+    broken: bool | None = None
+    cache: Cache | None = None
+    important: bool | None = None  # aka marked as Favorite.
 
     # Per API Doc: "Our API response could contain other fields, not described above.
     # It's unsafe to use them in your integration! They could be removed or renamed at any time."
     other: dict[str, Any] = {}
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _validator(cls, v):  # noqa: N805
         """Gather all non-recognised/unofficial attributes into a single attribute."""
         return _collect_other_attributes(cls, v)
@@ -972,7 +977,7 @@ class Raindrop(BaseModel):
 class Tag(BaseModel):
     """Represents existing Tags, either all or just a specific collection."""
 
-    tag: str = Field(None, alias="_id")
+    tag: str | None = Field(None, alias="_id")
     count: int
 
     @classmethod
