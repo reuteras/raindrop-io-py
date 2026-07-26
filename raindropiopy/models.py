@@ -239,13 +239,13 @@ class Collection(BaseModel):
     # Used to convert parent reference's of sub-collections to simply id's of the respective parent collection.
     @field_validator("parent", mode="before")
     @classmethod
-    def _extract_parent_id(cls, v):  # noqa: N805
+    def _extract_parent_id(cls, v):
         """Convert parent reference to parent ID."""
         return _resolve_parent_reference(v)
 
     @model_validator(mode="before")
     @classmethod
-    def _validator(cls, v):  # noqa: N805
+    def _validator(cls, v):
         """Gather all non-recognised/unofficial attributes into a single attribute."""
         return _collect_other_attributes(cls, v)
 
@@ -485,13 +485,13 @@ class UserConfig(BaseModel):
 
     @field_validator("last_collection", mode="before")
     @classmethod
-    def cast_last_collection_to_ref(cls, v):  # noqa: N805
+    def cast_last_collection_to_ref(cls, v):
         """Cast last_collection provided as a raw int to a valid CollectionRef."""
         return CollectionRef(**{"$id": v})
 
     @model_validator(mode="before")
     @classmethod
-    def _validator_other_attributes(cls, v):  # noqa: N805
+    def _validator_other_attributes(cls, v):
         """Gather all non-recognised/unofficial attributes into a single attribute."""
         return _collect_other_attributes(cls, v)
 
@@ -545,7 +545,7 @@ class SystemCollection(BaseModel):
     title: str | None = None
 
     @model_validator(mode="after")
-    def _validator(self):  # noqa: N805
+    def _validator(self):
         """Map the hard-coded id's of the System Collections to the descriptions used on the UI."""
         _titles = {
             CollectionRef.Unsorted.id: "Unsorted",
@@ -656,7 +656,7 @@ class Raindrop(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _validator(cls, v):  # noqa: N805
+    def _validator(cls, v):
         """Gather all non-recognised/unofficial attributes into a single attribute."""
         return _collect_other_attributes(cls, v)
 
@@ -667,7 +667,7 @@ class Raindrop(BaseModel):
         return cls(**item)
 
     @classmethod
-    def cache(cls, api: T_API, id: int) -> requests.Response:
+    def get_cache(cls, api: T_API, id: int) -> requests.Response:
         """Return the requests on behalf of a permanent copy of the specified Raindrop."""
         # Note: In testing in 2024-01, while I was able to get a URL back in this response
         # (after a 307 redirect), the URL did NOT work against S3...(essentially an "item not
