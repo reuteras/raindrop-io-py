@@ -1,12 +1,12 @@
+# Raindrop-IO-py
+
 [![version](https://img.shields.io/badge/python-3.10+-green)](https://www.python.org/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PBorocz/raindrop-io-py/blob/trunk/LICENSE)
 
-# PROJECT STATUS!
+## Project Status
 
 As of Spring 2024, I don't use RaindropIO anymore and thus will find it rather difficult to support this project. I'll keep up-to-date on CVE's of underlying packages for the foreseeable future but otherwise, FEEL FREE to fork and if you're interesting in taking ownership of the repo, feel free to contact me! (or open an issue)
-
-# Raindrop-IO-py
 
 Python wrapper for the API to the [Raindrop.io](https://raindrop.io) Bookmark Manager.
 
@@ -38,14 +38,13 @@ To use this package, you'll need two items:
 
 - However, to get API access to Raindrop, you'll need to create an `integration app` on [Raindrop](https://raindrop.io) site from which you can create API token(s).
 
-
 To setup your `integration app`:
 
 - Go to [<https://app.draindrop.api/settings/integrations>](https://app.raindrop.io/settings/integrations) and select `+ create new app`:
 
 - Give it a descriptive name and then select the app you just created.
 
-- Select `Create test token` and copy the token provided. Note that the basis for calling it a _test_ token is that it only gives you access to bookmarks within *your own account*. Raindrop allows you to use their API against other people's environments using oAuth (see untested/unsupported `flask_oauth.py` file in /examples)
+- Select `Create test token` and copy the token provided. Note that the basis for calling it a _test_ token is that it only gives you access to bookmarks within _your own account_. Raindrop allows you to use their API against other people's environments using oAuth (see untested/unsupported `flask_oauth.py` file in /examples)
 
 - Save your token into your environment (we use python-dotenv so a simple .env/.envrc file containing your token should suffice), for example:
 
@@ -78,7 +77,7 @@ or a wrapper script is available to run all of them, in logical order with a sma
 
 ### API Examples
 
-Here are a few examples of API usage. Note that I don't have testing for the examples below (yet), but the examples folder helps significantly as it runs against your *live* Raindrop environment.
+Here are a few examples of API usage. Note that I don't have testing for the examples below (yet), but the examples folder helps significantly as it runs against your _live_ Raindrop environment.
 
 #### Display All Collections and Unsorted Bookmarks
 
@@ -95,13 +94,13 @@ load_dotenv()
 
 with API(os.environ["RAINDROP_TOKEN"]) as api:
 
-	print("Current Collections:")
-	for collection in Collection.get_collections(api):
-		print(collection.title)
+ print("Current Collections:")
+ for collection in Collection.get_collections(api):
+  print(collection.title)
 
-	print("\nUnsorted Raindrop Bookmarks):")
-	for item in Raindrop.search(api, collection=CollectionRef.Unsorted):
-		print(item.title)
+ print("\nUnsorted Raindrop Bookmarks):")
+ for item in Raindrop.search(api, collection=CollectionRef.Unsorted):
+  print(item.title)
 ```
 
 #### Create a New Raindrop Bookmark to a URL
@@ -116,10 +115,10 @@ from raindropiopy import API, Raindrop
 load_dotenv()
 
 with API(os.environ["RAINDROP_TOKEN"]) as api:
-	link, title = "https://www.python.org/", "Our Benevolent Dictator's Creation"
-	print(f"Creating Raindrop to: '{link}' with title: '{title}'...", flush=True, end="")
-	raindrop = Raindrop.create_link(api, link=link, title=title, tags=["abc", "def"])
-	print(f"Done, id={raindrop.id}")
+ link, title = "https://www.python.org/", "Our Benevolent Dictator's Creation"
+ print(f"Creating Raindrop to: '{link}' with title: '{title}'...", flush=True, end="")
+ raindrop = Raindrop.create_link(api, link=link, title=title, tags=["abc", "def"])
+ print(f"Done, id={raindrop.id}")
 
 ```
 
@@ -140,17 +139,17 @@ from raindropiopy import API, Collection
 load_dotenv()
 
 with API(os.environ["RAINDROP_TOKEN"]) as api:
-	title = f"TEST Collection ({getuser()}@{datetime.now():%Y-%m-%dT%H:%M:%S})"
-	print(f"Creating collection: '{title}'...", flush=True, end="")
-	collection = Collection.create(api, title=title)
-	print(f"Done, {collection.id=}.")
+ title = f"TEST Collection ({getuser()}@{datetime.now():%Y-%m-%dT%H:%M:%S})"
+ print(f"Creating collection: '{title}'...", flush=True, end="")
+ collection = Collection.create(api, title=title)
+ print(f"Done, {collection.id=}.")
 ```
 
 (after this has executed, go to your Raindrop.io environment (site or app) and you should see this collection available)
 
 ## Documentation
 
-We use [Sphinx](https://www.sphinx-doc.org/en/master/index.html) with [Google-style docstrings](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) to document our API. Documentation is hosted by [ReadTheDocs](https://readthedocs.org/) and can be found [here](https://raindrop-io-py.readthedocs.io/en/latest/).
+We use [Sphinx](https://www.sphinx-doc.org/en/master/index.html) with [Google-style docstrings](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) to document our API. Documentation is hosted by [ReadTheDocs](https://readthedocs.org/) and can be found at [raindrop-io-py.readthedocs.io](https://raindrop-io-py.readthedocs.io/en/latest/).
 
 ## Acknowledgments
 
@@ -175,6 +174,7 @@ The project is licensed under the MIT License.
 - SECURITY: Update `urllib` based on CVE-2025-50181 & CVE-2025-50182 (both moderate severity)
 
 ### 0.4.5 - 2025-08-18
+
 - SECURITY: Update `requests` based on CVE-2024-47081 (moderate severity)
 - SECURITY: Update `jinja2` based on CVE-2025-27516 (moderate severity)
 - SECURITY: Update `tornado` based on CVE-2025-47287 (high severity).
@@ -217,7 +217,7 @@ The project is licensed under the MIT License.
 
 ### 0.2.3 - 2024-04-12
 
-- INTERNAL: In an attempt create a full (ie. file-based) exporter, added a "cache" call to the Raindrop class to return a URL to the cached/permanent pdf/file documents on S3. While the call ostensibly works, the returned URL's don't work against S3 ("item not found"). Thus, use AT YOUR OWN RISK (and let me know if you *do* get a successful use of it! ;-)
+- INTERNAL: In an attempt create a full (ie. file-based) exporter, added a "cache" call to the Raindrop class to return a URL to the cached/permanent pdf/file documents on S3. While the call ostensibly works, the returned URL's don't work against S3 ("item not found"). Thus, use AT YOUR OWN RISK (and let me know if you _do_ get a successful use of it! ;-)
 - SECURITY: Addressed vulnerabilities in idna and dnspython.
 
 ### 0.2.2 - 2024-01-18
@@ -227,10 +227,12 @@ The project is licensed under the MIT License.
 - FIXED: Addressed error in nested Collections, handling case of parent reference as either a dict, an int or None.
 
 ### v0.2.1 - 2023-12-12
+
 - FIXED: Minor bug in recently updated list_collections.
 - CHANGED: Continued to remove redundant packages.
 
 ### v0.2.0 - 2023-12-12
+
 - FIXED: Inability to correctly handle "sub" or child collections. We now correctly unpack 'parent' references on querying child collections...(ht to [@limaceous-bushwhacker](https://github.com/limaceous-bushwhacker) in [issue #12](https://github.com/PBorocz/raindrop-io-py/issues/12)).
 - FIXED: Bugs in `examples/list_collections.py` and `examples\list_authorised_user.py`) that were using old collection attribute `internal_` instead of renamed `other` (to list the _other_/non-official attributes associated with a Collection).
 - FIXED: False positives from tests associated with collections (noticed after adding test obo sub/child collections). There are a few tests not supported yet so the examples code (which runs against the live Raindrop environment is still valuable).
@@ -282,7 +284,7 @@ The project is licensed under the MIT License.
 ### v0.0.15 - 2023-02-11
 
 - CHANGED: `Raindrop.search_paged` is now hidden (can't see a reason to explicitly use it over `Raindrop.search`)
-- CHANGED: Several attributes that, while allowed to be set by RaindropIO's API, are now *not* able to be set by this API. For example, you shouldn't be able to change "time" by setting `created` or `last_update` fields on a Raindrop or Collection.
+- CHANGED: Several attributes that, while allowed to be set by RaindropIO's API, are now _not_ able to be set by this API. For example, you shouldn't be able to change "time" by setting `created` or `last_update` fields on a Raindrop or Collection.
 - CHANGED: The `Collection`, `Raindrop` and `Tag` "remove" method is now "delete" to more accurately match with RaindropIO's API).
 
 ### v0.0.14 - 2023-02-09
@@ -344,7 +346,7 @@ from raindroiopy.api import API
 
 - FIXED: Sample file upload specification in `examples/create_raindrop_file.py` is now correct.
 
-.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
-	:alt: Documentation Status
-	:scale: 100%
-	:target: https://docs.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: <https://readthedocs.org/projects/docs/badge/?version=latest>
+ :alt: Documentation Status
+ :scale: 100%
+ :target: <https://docs.readthedocs.io/en/latest/?badge=latest>
