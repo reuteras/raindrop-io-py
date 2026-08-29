@@ -19,7 +19,6 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/PBorocz/raindrop-io-py"
-Documentation = "https://raindrop-io-py.rtfd.io"
 
 [dependency-groups]
 dev = [
@@ -27,16 +26,6 @@ dev = [
     "vcrpy>=4.2.1,<9",
     "fawltydeps>=0.17.0,<0.21",
     "pytest>=7.4.3,<10",
-]
-docs = [
-    "sphinx>=7.2.6,<9",
-    "sphinx-autobuild>=2021.3.14,<2025",
-]
-
-[tool.uv]
-default-groups = [
-    "dev",
-    "docs",
 ]
 
 [tool.ruff]

@@ -112,10 +112,6 @@ with API(os.environ["RAINDROP_TOKEN"]) as api:
 
 (after this has executed, go to your Raindrop.io environment (site or app) and you should see this collection available)
 
-## Documentation
-
-We use [Sphinx](https://www.sphinx-doc.org/en/master/index.html) with [Google-style docstrings](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) to document our API. Documentation is hosted by [ReadTheDocs](https://readthedocs.org/) and can be found at [raindrop-io-py.readthedocs.io](https://raindrop-io-py.readthedocs.io/en/latest/).
-
 ## Acknowledgments
 
 [python-raindropio](https://github.com/atsuoishimoto/python-raindropio) from [Atsuo Ishimoto](https://github.com/atsuoishimoto).
