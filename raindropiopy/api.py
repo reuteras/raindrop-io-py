@@ -7,7 +7,6 @@ abstraction layer for calls available for the Core Classes, ie. Collection, Rain
 import datetime
 import enum
 import json
-from pathlib import Path
 from typing import Any, Final, TypeVar
 
 import requests
@@ -37,13 +36,13 @@ class API:
         Can either be used directly as a context manager:
 
         >>> api = API(token="yourTestTokenFromRaindropIO"):
-        >>> collections = Collection.get_collections(api)
+        >>> collections = Collection.get_root_collections(api)
         >>> # ...
 
         or
 
         >>> with API(token="yourTestTokenFromRaindropIO") as api:
-        >>>     user = User.get(api)
+        >>>     raindrops = Raindrop.search(api)
         >>>     # ...
     """
 
@@ -191,33 +190,6 @@ class API:
         self._on_resp(ret)
         return ret
 
-    def put_file(
-        self,
-        url: str,
-        path: Path,
-        data: dict,
-        files: dict,
-    ) -> requests.models.Response:
-        """Upload a file by a PUT request.
-
-        Parameters:
-            url: The url to send the PUT request to.
-
-            path: Path to file to be uploaded.
-
-            data: Dictionary, payload to be sent for the :class:`Request`, e.g. {"collectionId" : aCollection.id}
-
-            files: Dictionary, request library "files" object to be sent for the :class:`Request`,
-                e.g. {'file': (aFileName, aFileLikeObj, aContentType)}
-
-        Returns:
-            :class:`requests.Response` object.
-        """
-        assert self.session
-        ret = self.session.put(url, data=data, files=files)
-        self._on_resp(ret)
-        return ret
-
     def post(self, url: str, json: Any = None) -> requests.models.Response:
         """Low-level call to perform a POST method against our present connection.
 
@@ -232,24 +204,6 @@ class API:
         json = self._to_json(json)
         assert self.session
         ret = self.session.post(url, headers=self._request_headers_json(), data=json)
-        self._on_resp(ret)
-        return ret
-
-    def delete(self, url: str, json: Any = None) -> requests.models.Response:
-        """Low-level call to perform a DELETE method against our present connection.
-
-        Parameters:
-            url: The url to send the DELETE request to.
-
-            json: JSON object to be sent.
-
-        Returns:
-            :class:`requests.Response` object.
-        """
-        json = self._to_json(json)
-
-        assert self.session
-        ret = self.session.delete(url, headers=self._request_headers_json(), data=json)
         self._on_resp(ret)
         return ret
 

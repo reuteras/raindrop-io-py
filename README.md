@@ -10,7 +10,7 @@ As of Spring 2024, I don't use RaindropIO anymore and thus will find it rather d
 
 Python wrapper for the API to the [Raindrop.io](https://raindrop.io) Bookmark Manager.
 
-Capabilities include the ability to create, update, delete both link & file-based Raindrops; create, update delete Raindrop collections, tags etc.
+This fork is trimmed to the surface area used by [raindrop2rss](https://github.com/reuteras/raindrop2rss): searching and updating Raindrops, and getting/creating Collections.
 
 ## Background
 
@@ -44,7 +44,7 @@ To setup your `integration app`:
 
 - Give it a descriptive name and then select the app you just created.
 
-- Select `Create test token` and copy the token provided. Note that the basis for calling it a _test_ token is that it only gives you access to bookmarks within _your own account_. Raindrop allows you to use their API against other people's environments using oAuth (see untested/unsupported `flask_oauth.py` file in /examples)
+- Select `Create test token` and copy the token provided. Note that the basis for calling it a _test_ token is that it only gives you access to bookmarks within _your own account_.
 
 - Save your token into your environment (we use python-dotenv so a simple .env/.envrc file containing your token should suffice), for example:
 
@@ -61,25 +61,11 @@ set -gx RAINDROP_TOKEN 01234567890-abcdefghf-aSample-API-Token-01234567890-abcde
 # etc...
 ```
 
-## Examples
-
-A full suite of examples are provided in the `examples` directory. Each can be run independently as:
-
-```shell
-[.venv] % python examples/list_collections.py
-```
-
-or a wrapper script is available to run all of them, in logical order with a small wait to be nice to Raindrop's API:
-
-```shell
-[.venv] % python examples/RUN_ALL.py
-```
-
 ### API Examples
 
-Here are a few examples of API usage. Note that I don't have testing for the examples below (yet), but the examples folder helps significantly as it runs against your _live_ Raindrop environment.
+Here are a few examples of API usage.
 
-#### Display All Collections and Unsorted Bookmarks
+#### Display All Root Collections and Unsorted Bookmarks
 
 This example shows the intended usage of the API as a context-manager, from which any number of calls can be made:
 
@@ -95,34 +81,13 @@ load_dotenv()
 with API(os.environ["RAINDROP_TOKEN"]) as api:
 
  print("Current Collections:")
- for collection in Collection.get_collections(api):
+ for collection in Collection.get_root_collections(api):
   print(collection.title)
 
  print("\nUnsorted Raindrop Bookmarks):")
  for item in Raindrop.search(api, collection=CollectionRef.Unsorted):
   print(item.title)
 ```
-
-#### Create a New Raindrop Bookmark to a URL
-
-```python
-import os
-
-from dotenv import load_dotenv
-
-from raindropiopy import API, Raindrop
-
-load_dotenv()
-
-with API(os.environ["RAINDROP_TOKEN"]) as api:
- link, title = "https://www.python.org/", "Our Benevolent Dictator's Creation"
- print(f"Creating Raindrop to: '{link}' with title: '{title}'...", flush=True, end="")
- raindrop = Raindrop.create_link(api, link=link, title=title, tags=["abc", "def"])
- print(f"Done, id={raindrop.id}")
-
-```
-
-(after this has executed, go to your Raindrop.io environment (site or app) and you should see this Raindrop to python.org available)
 
 #### Create a New Raindrop Collection
 
@@ -209,7 +174,7 @@ The project is licensed under the MIT License.
 ### 0.2.5 - 2024-05-26
 
 - SECURITY: Update `requests` to address potential security vulnerability (CVE-2024-35195).
-- FIXED: Fixed minor typo in the [Display All Collections and Unsorted Bookmarks](#display-all-collections-and-unsorted-bookmarks) example above; missing closing parens on `print` statements.
+- FIXED: Fixed minor typo in the [Display All Root Collections and Unsorted Bookmarks](#display-all-root-collections-and-unsorted-bookmarks) example above; missing closing parens on `print` statements.
 
 ### 0.2.4 - 2024-05-07
 

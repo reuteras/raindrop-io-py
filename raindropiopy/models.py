@@ -3,7 +3,7 @@
 Raindrop.IO has a small set of core data entities (e.g. Raindrops aka bookmarks, Collections, Tags etc.). We
 deliver the services provided by Raindrop.IO as a set of class-based methods on these various data entities.
 
-For example, to create a new raindrop, use Raindrop.create_link(...); a collection would be Collection.create(...) etc.
+For example, to search for raindrops, use Raindrop.search(...); a collection would be Collection.create(...) etc.
 
 """
 
@@ -11,13 +11,10 @@ from __future__ import annotations
 
 import enum
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
-import requests
 from pydantic import (
     BaseModel,
-    EmailStr,
     Field,
     HttpUrl,
     NonNegativeInt,
@@ -31,17 +28,10 @@ from .api import T_API  # ie. for typing only...
 __all__ = [
     "Access",
     "AccessLevel",
-    "BrokenLevel",
     "Collection",
     "CollectionRef",
-    "FontColor",
-    "Group",
     "Raindrop",
-    "RaindropSort",
     "RaindropType",
-    "Tag",
-    "User",
-    "UserFiles",
     "UserRef",
     "View",
 ]
@@ -109,35 +99,6 @@ class View(enum.Enum):
     simple = "simple"
     grid = "grid"
     masonry = "masonry"
-
-
-class BrokenLevel(enum.Enum):
-    """Enumerate user levels."""
-
-    basic = "basic"
-    default = "default"
-    strict = "strict"
-    off = "off"
-
-
-class FontColor(enum.Enum):
-    """Enumerate user display themes available."""
-
-    sunset = "sunset"
-    night = "night"
-
-
-class RaindropSort(enum.Enum):
-    """Enumerate Raindrop sort options available."""
-
-    created_up = "created"
-    created_dn = "-created"
-    title_up = "title"
-    title_dn = "-title"
-    domain_up = "domain"
-    domain_dn = "-domain"
-    last_update_up = "+lastUpdate"
-    last_update_dn = "-lastUpdate"
 
 
 class RaindropType(enum.Enum):
@@ -258,68 +219,10 @@ class Collection(BaseModel):
 
         Returns:
             The (potentially empty) list of non-system, **top-level** Collections associated with the API's user.
-
-        Note:
-            Since Raindrop allows for collections to be nested, the RaindropIO's API distinguishes between Collections
-            at the top-level/root of a collection hierarchy versus those all that are below the top level, aka 'child'
-            or 'sub' collections. Thus, use ``get_root_collections`` to get all Collections without parents and
-            ``get_child_collections`` for all Collections with parents.
         """
         ret = api.get(URL.format(path="collections"))
         items = ret.json()["items"]
         return [cls(**item) for item in items]
-
-    @classmethod
-    def get_child_collections(cls, api: T_API) -> list[Collection]:
-        """Get the **child** Raindrop collections (ie. all below root level).
-
-        Args:
-            api: API Handle to use for the request.
-
-        Returns:
-            The (potentially empty) list of non-system, **non-top-level** Collections associated with the API's user.
-
-        Note:
-            Since Raindrop allows for collections to be nested, the RaindropIO's API distinguishes between Collections
-            at the top-level/root of a collection hierarchy versus those all that are below the top level, aka 'child'
-            collections. Thus, use ``get_root_collections`` to get all Collections without parents and
-            ``get_child_collections`` for all Collections with parents.
-        """
-        ret = api.get(URL.format(path="collections/childrens"))
-        items = ret.json()["items"]
-        return [cls(**item) for item in items]
-
-    @classmethod
-    def get_collections(cls, api: T_API) -> list[Collection]:
-        """Query for all non-system collections (essentially a convenience wrapper, combining root & child Collections).
-
-        Args:
-            api: API Handle to use for the request.
-
-        Returns:
-            The (potentially empty) list of all **non-system** Collections associated with the API's user,
-            ie. hiding the distinction between root/child collections.
-        """
-        return cls.get_root_collections(api) + cls.get_child_collections(api)
-
-    @classmethod
-    def get(cls, api: T_API, id: int) -> Collection:
-        """Return a Raindrop Collection instance based on it's id.
-
-        Args:
-            api: API Handle to use for the request.
-
-            id: Id of Collection to query for.
-
-        Returns:
-            ``Collection`` instance associated with the id provided.
-
-        Raises:
-            HTTPError: If the id provided could not be found (specifically 404)
-        """
-        url = URL.format(path=f"collection/{id}")
-        item = api.get(url).json()["item"]
-        return cls(**item)
 
     @classmethod
     def create(
@@ -376,65 +279,6 @@ class Collection(BaseModel):
         return cls(**item)
 
     @classmethod
-    def update(
-        cls,
-        api: T_API,
-        id: int,
-        cover: list[str] | None = None,
-        expanded: bool | None = None,
-        parent: int | None = None,
-        public: bool | None = None,
-        sort: int | None = None,
-        title: str | None = None,
-        view: View | None = None,
-    ) -> Collection:
-        """Update an existing Raindrop collection with any of the attribute values provided.
-
-        Args:
-            api: API Handle to use for the request.
-
-            id: Required, Id of Collection to be updated.
-
-            cover: URL of collection's cover (as a list but only the first entry is used).
-
-            expanded: Flag for whether or not any of the collection's sub-collections are expanded.
-
-            parent: Id of the collection's **parent** to set the current collection to.
-
-            public: Flag for whether or not the collection should be publically available.
-
-            sort: Sort order for Raindrops created in this collection.
-
-            title: New collection title.
-
-            view: View enum associated with the default view to display Raindrops in this collection.
-
-        Returns:
-            Updated ``Collection`` instance.
-        """
-        args: dict[str, Any] = {}
-        for attr in ["expanded", "view", "title", "sort", "public", "parent", "cover"]:
-            if (value := locals().get(attr)) is not None:
-                args[attr] = value
-        url = URL.format(path=f"collection/{id}")
-        item = api.put(url, json=args).json()["item"]
-        return cls(**item)
-
-    @classmethod
-    def delete(cls, api: T_API, id: int) -> None:
-        """Delete a Raindrop collection.
-
-        Args:
-            api: API Handle to use for the request.
-
-            id: Id of Collection to be deleted.
-
-        Returns:
-            None.
-        """
-        api.delete(URL.format(path=f"collection/{id}"), json={})
-
-    @classmethod
     def get_or_create(cls, api: T_API, title: str) -> Collection:
         """Get a Raindrop collection based on it's **title**, if it doesn't exist, create it.
 
@@ -453,127 +297,6 @@ class Collection(BaseModel):
 
         # Doesn't exist, create it!
         return Collection.create(api, title=title)
-
-
-class Group(BaseModel):
-    """Sub-model defining a Raindrop user group."""
-
-    title: str
-    hidden: bool
-    sort: NonNegativeInt
-    collectionids: list[int] | None = Field(None, alias="collections")
-
-
-class UserConfig(BaseModel):
-    """Sub-model defining a Raindrop user's configuration.
-
-    Warning:
-        Attributes in `other` are NOT OFFICIALLY SUPPORTED!.
-    """
-
-    broken_level: BrokenLevel | None = None
-    font_color: FontColor | None = None
-    font_size: int | None = None
-    lang: str | None = None
-    last_collection: CollectionRef | None = None
-    raindrops_sort: RaindropSort | None = None
-    raindrops_view: View | None = None
-
-    # Per API Doc: "Our API response could contain other fields, not described above.
-    # It's unsafe to use them in your integration! They could be removed or renamed at any time."
-    other: dict[str, Any] = {}
-
-    @field_validator("last_collection", mode="before")
-    @classmethod
-    def cast_last_collection_to_ref(cls, v):
-        """Cast last_collection provided as a raw int to a valid CollectionRef."""
-        return CollectionRef(**{"$id": v})
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validator_other_attributes(cls, v):
-        """Gather all non-recognised/unofficial attributes into a single attribute."""
-        return _collect_other_attributes(cls, v)
-
-
-class UserFiles(BaseModel):
-    """Sub-model defining a file associated with a user (?)."""
-
-    used: int
-    size: PositiveInt
-    last_checkpoint: datetime | None = Field(None, alias="lastCheckpoint")
-
-
-class User(BaseModel):
-    """Raindrop User model."""
-
-    id: int | None = Field(None, alias="_id")
-    email: EmailStr
-    email_md5: str | None = Field(None, alias="email_MD5")
-    files: UserFiles
-    full_name: str | None = Field(None, alias="fullName")
-    groups: list[Group]
-    password: bool
-    pro: bool
-    pro_expire: datetime | None = Field(None, alias="proExpire")
-    registered: datetime
-    config: UserConfig
-
-    @classmethod
-    def get(cls, api: T_API) -> User:
-        """Get all the information about the Raindrop user associated with the API token."""
-        user = api.get(URL.format(path="user")).json()["user"]
-        return cls(**user)
-
-
-class SystemCollection(BaseModel):
-    """Raindrop **System** collection model, ie. collections for *Unsorted*, *Trash* and *All*.
-
-    Note:
-        - The *All* collection contains **all** currently active (ie. non-Trash) Raindrops held by the User.
-
-        - The *Unsorted* collection contains Raindrops created that are **not** held within any other collection.
-
-        - The *Trash* collection contains Raindrops that have been recently deleted.
-
-    You won't use this class directly on behalf of individual Raindrops, rather, its definition is on behalf of
-    a small set of simple "status" calls available from the Raindrop.io API, specifically `get_counts` and `get_meta`.
-    """
-
-    id: int | None = Field(None, alias="_id")
-    count: NonNegativeInt
-    title: str | None = None
-
-    @model_validator(mode="after")
-    def _validator(self):
-        """Map the hard-coded id's of the System Collections to the descriptions used on the UI."""
-        _titles = {
-            CollectionRef.Unsorted.id: "Unsorted",
-            CollectionRef.All.id: "All",
-            CollectionRef.Trash.id: "Trash",
-        }
-        self.title = _titles.get(self.id)
-        return self
-
-    @classmethod
-    def get_counts(cls, api: T_API) -> list[Collection]:
-        """Get the count of Raindrops in each of the 3 *system* collections."""
-        items = api.get(URL.format(path="user/stats")).json()["items"]
-        return [cls(**item) for item in items]
-
-    @classmethod
-    def get_meta(cls, api: T_API) -> dict:
-        """Get the 'meta' slug from the root/system Collection.
-
-        Contains information about:
-
-        - Last date/time any bookmark was changed.
-
-        - The number of broken links in bookmarks.
-
-        - If your account is a "pro" level.
-        """
-        return api.get(URL.format(path="user/stats")).json()["meta"]
 
 
 class File(BaseModel):
@@ -661,171 +384,6 @@ class Raindrop(BaseModel):
         return _collect_other_attributes(cls, v)
 
     @classmethod
-    def get(cls, api: T_API, id: int) -> Raindrop:
-        """Return a Raindrop bookmark based on it's id."""
-        item = api.get(URL.format(path=f"{id}")).json()["item"]
-        return cls(**item)
-
-    @classmethod
-    def get_cache(cls, api: T_API, id: int) -> requests.Response:
-        """Return the requests on behalf of a permanent copy of the specified Raindrop."""
-        # Note: In testing in 2024-01, while I was able to get a URL back in this response
-        # (after a 307 redirect), the URL did NOT work against S3...(essentially an "item not
-        # found" from the S3 infrastructure).
-        return api.get(URL.format(path=f"raindrop/{id}/cache"))
-
-    @classmethod
-    def create_link(
-        cls,
-        api: T_API,
-        link: str,
-        collection: (Collection | CollectionRef, int) | None = None,
-        cover: str | None = None,
-        excerpt: str | None = None,
-        important: bool | None = None,
-        media: list[dict[str, Any]] | None = None,
-        order: int | None = None,
-        please_parse: bool = False,  # If set, asks API to automatically parse metadata in the background
-        tags: list[str] | None = None,
-        title: str | None = None,
-    ) -> Raindrop:
-        """Create a new link-type Raindrop bookmark.
-
-        Args:
-            api: API Handle to use for the request.
-
-            link: Required, URL to associate with this Raindrop.
-
-            collection: Optional, Collection (or CollectionRef) to place this Raindrop "into".
-              If not specified, new Raindrop will be in system Collection "Unsorted".
-
-            cover: Optional, URL of the Raindrop's "cover".
-
-            excerpt: Optional, long description for the Raindrop (internally, Raindrop call's
-              it an *excerpt* but on the UI it's *Description*). Maximum length is 10k characters.
-
-            important: Optional, Flag to indicate if this Raindrop should be considered important nee a favorite.
-
-            media: Optional, List of media dictionaries (consult RaindropIO's API for somewhat more information.
-
-            order: Optional, Order of Raindrop in respective collection, ie. set to 0 to make Raindrop first.
-
-            please_parse: Optional, Flag that asks API to automatically parse metadata in the background
-              (not exactly sure which this implies, message me if you know! ;-)
-
-            tags: Optional, List of tags to associated with this Raindrop.
-
-            title: Optional, Title to associated with this Raindrop.
-
-        Returns:
-            ``Raindrop`` instance created.
-
-        Note:
-            We don't allow you to set either ``created`` or ``last_update`` attributes. They will be
-            set appropriately by the RaindropIO service on your behalf.
-        """
-        # Setup the args that will be passed to the underlying Raindrop API, only link is
-        # absolutely required, rest are optional!
-        args: dict[str, Any] = dict(type=RaindropType.link, link=link)
-
-        if please_parse:
-            args["please_parse"] = {}
-
-        for attr in [
-            "cover",
-            "excerpt",
-            "important",
-            "media",
-            "order",
-            "tags",
-            "title",
-        ]:
-            if (value := locals().get(attr)) is not None:
-                args[attr] = value
-
-        if collection is not None:
-            # <collection> arg could be **either** an actual collection
-            # or simply an int collection "id" already, handle either:
-            if isinstance(collection, Collection | CollectionRef):
-                args["collection"] = {"$id": collection.id}
-            else:
-                args["collection"] = {"$id": collection}
-        url = URL.format(path="raindrop")
-        item = api.post(url, json=args).json()["item"]
-        return cls(**item)
-
-    @classmethod
-    def create_file(
-        cls,
-        api: T_API,
-        path: Path,
-        content_type: str,
-        collection: (Collection | CollectionRef, int) | None = CollectionRef.Unsorted,
-        tags: list[str] | None = None,
-        title: str | None = None,
-    ) -> Raindrop:
-        """Create a new file-based Raindrop bookmark.
-
-        Args:
-            api: API Handle to use for the request.
-
-            path: Required, python Path to file to be uploaded.
-
-            content_type: Required, mime-type associated with the file.
-
-            collection: Optional, Collection (or CollectionRef) to place this Raindrop "into".
-              If not specified, new Raindrop will be in system Collection *Unsorted*.
-
-            tags: Optional, List of tags to associated with this Raindrop.
-
-            title: Optional, Title to associated with this Raindrop.
-
-        Returns:
-            ``Raindrop`` instance created.
-
-        Note:
-            Only a limited number of file-types are supported by RaindropIO (minimally, "application/pdf"),
-            specifically (as of 2023-02):
-
-            - Images (jpeg, gif, png, webp, heic)
-
-            - Videos (mp4, mov, wmv, webm)
-
-            - Books (epub)
-
-            - Documents (pdf, md, txt)
-        """
-        # Uses a different URL for file uploading..
-        url = URL.format(path="raindrop/file")
-
-        # NOTE: "put_file" arguments and structure here confirmed through communication
-        #       with RustemM on 2022-11-29 and his subsequent update to API docs.
-        if isinstance(collection, Collection | CollectionRef):
-            data = {"collectionId": str(collection.id)}
-        else:
-            data = {"collectionId": str(collection)}
-
-        with open(path, "rb") as fh_:
-            files = {"file": (path.name, fh_, content_type)}
-            item = api.put_file(url, path, data, files).json()["item"]
-            raindrop = cls(**item)
-
-        # Raindrop's "Create Raindrop From File" does not allow us to set other attributes,
-        # thus, we need to check if any of the possible attributes need to be set and do so
-        # explicitly with another call to "update" the Raindrop we just created.
-        args: dict[str, Any] = {}
-        if title is not None:
-            args["title"] = title
-        if tags is not None:
-            args["tags"] = tags
-        if args:
-            url = URL.format(path=f"raindrop/{raindrop.id}")
-            item = api.put(url, json=args).json()["item"]
-            return cls(**item)
-        else:
-            return raindrop
-
-    @classmethod
     def update(
         cls,
         api: T_API,
@@ -905,20 +463,6 @@ class Raindrop(BaseModel):
         return cls(**item)
 
     @classmethod
-    def delete(cls, api: T_API, id: int) -> None:
-        """Delete a Raindrop bookmark.
-
-        Args:
-            api: API Handle to use for the request.
-
-            id: Required id of Raindrop to be deleted.
-
-        Returns:
-            None.
-        """
-        api.delete(URL.format(path=f"raindrop/{id}"), json={})
-
-    @classmethod
     def _search_paged(
         cls,
         api: T_API,
@@ -972,42 +516,3 @@ class Raindrop(BaseModel):
             results.extend(raindrops)
             page += 1
         return results
-
-
-class Tag(BaseModel):
-    """Represents existing Tags, either all or just a specific collection."""
-
-    tag: str | None = Field(None, alias="_id")
-    count: int
-
-    @classmethod
-    def get(cls, api: T_API, collection_id: int | None = None) -> list[Tag]:
-        """Get all the tags currently defined, either in a specific collections or across all collections.
-
-        Args:
-            api: API Handle to use for the request.
-
-            collection_id: Optional, Id of specific collection to limit search for all tags.
-
-        Returns:
-            List of ``Tag``.
-        """
-        url = URL.format(path="tags")
-        if collection_id:
-            url += "/" + str(collection_id)
-        items = api.get(url).json()["items"]
-        return [Tag(**item) for item in items]
-
-    @classmethod
-    def delete(cls, api: T_API, tags: list[str]) -> None:
-        """Delete one or more Tags.
-
-        Args:
-            api: API Handle to use for the request.
-
-            tags: List of tags to be deleted.
-
-        Returns:
-            None.
-        """
-        api.delete(URL.format(path="tags"), json={})

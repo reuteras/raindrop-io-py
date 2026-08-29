@@ -99,10 +99,6 @@ convention = "google"
 [tool.ruff.lint.mccabe]
 max-complexity = 13
 
-[tool.vulture]
-min_confidence = 80
-paths = ["raindropiopy", "examples", "vulture_whitelist.py"]
-
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["raindropiopy*"]
