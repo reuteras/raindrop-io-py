@@ -24,7 +24,6 @@ Documentation = "https://raindrop-io-py.rtfd.io"
 
 [dependency-groups]
 dev = [
-    "pre-commit>=2.21.0,<5",
     "requests>=2.28.2,<3",
     "vcrpy>=4.2.1,<9",
     "fawltydeps>=0.17.0,<0.21",
