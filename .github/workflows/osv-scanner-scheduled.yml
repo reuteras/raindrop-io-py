@@ -7,7 +7,7 @@ on:
     - cron: "30 2 * * *"
   # Change "main" to your default branch if you use a different name, i.e. "master"
   push:
-    branches: [main]
+    branches: [trunk]
 
 permissions:
   # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
