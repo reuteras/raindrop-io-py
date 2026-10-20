@@ -29,7 +29,7 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py314"
+target-version = "py311"
 line-length = 120
 lint.select = [
 	   # Which Ruff suites are we running?
