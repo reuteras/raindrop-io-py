@@ -3,7 +3,7 @@ name = "raindrop-io-py"
 version = "0.4.7"
 description = "API for Raindrop.io bookmark manager"
 authors = [{ name = "Peter Borocz <peter.borocz+raindrop-io-py@google.com>" }]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 readme = "README.md"
 keywords = ["python"]
 classifiers = [
@@ -29,7 +29,7 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py314"
 line-length = 120
 lint.select = [
 	   # Which Ruff suites are we running?
