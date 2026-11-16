@@ -1,12 +1,11 @@
 """Provide all shared test fixtures for API tests."""
 
-import pytest
 from pathlib import Path
 
+import pytest
 from vcr import VCR
 
 from raindropiopy import API
-
 
 # Define once for "from tests.api.conftest import vcr" in every test where we touch Raindrop.
 vcr = VCR(

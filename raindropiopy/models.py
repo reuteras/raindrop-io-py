@@ -46,7 +46,7 @@ URL = "https://api.raindrop.io/rest/v1/{path}"
 def _collect_other_attributes(cls, v):
     """Gather all non-recognised/unofficial non-empty attribute values into a single one."""
     skip_attrs = "_id"  # We don't need to store alias attributes again (pydantic will take care of)
-    v["other"] = dict()
+    v["other"] = {}
     for attr, value in v.items():
         if value and attr not in cls.model_fields and attr not in skip_attrs:
             v["other"][attr] = value
@@ -247,7 +247,7 @@ class Collection(BaseModel):
 
             parent: Optional, Id of the collection's **parent** you want to create nested collections.
 
-            public: Optional, flag for whether or not the collection should be publically available.
+            public: Optional, flag for whether or not the collection should be publicly available.
 
             sort: Optional, sort order for Raindrops created in this collection.
 
@@ -506,7 +506,7 @@ class Raindrop(BaseModel):
             A (potentially empty) list of Raindrops that match the search criteria provided.
         """
         page = 0
-        results = list()
+        results = []
         while raindrops := Raindrop._search_paged(
             api,
             collection,

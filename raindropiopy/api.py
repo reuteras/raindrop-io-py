@@ -19,7 +19,7 @@ URL_ACCESS_TOKEN: Final = "https://raindrop.io/oauth/access_token"
 URL_REFRESH: Final = "https://raindrop.io/oauth/access_token"
 
 # In py3.11, we'll be able to do 'from typing import Self' instead
-T_API = TypeVar("API")
+T_API = TypeVar("T_API")
 
 
 class API:
@@ -125,7 +125,7 @@ class API:
             return None
 
     def _on_resp(self, resp: Any) -> None:
-        """Handle a RaindropIO API response, first pulling rate-limiting parms in effect due to high activity levels."""
+        """Handle a RaindropIO API response and pull any rate-limiting params in effect."""
 
         def get_int(name: str) -> int | None:
             value = resp.headers.get(name, None)

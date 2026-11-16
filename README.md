@@ -14,7 +14,11 @@ This fork is trimmed to the surface area used by [raindrop2rss](https://github.c
 
 ## Background
 
-I wanted to use an existing API for the Raindrop Bookmark Manager ([python-raindropio](https://github.com/atsuoishimoto/python-raindropio)) to perform some bulk operations through a simple command-line interface. However, the API was incomplete didn't seem actively supported anymore. Thus, this is a _fork_ and significant extension of [python-raindropio](https://github.com/atsuoishimoto/python-raindropio) (ht [Atsuo Ishimoto](https://github.com/atsuoishimoto)).
+I wanted to use an existing API for the Raindrop Bookmark Manager
+([python-raindropio](https://github.com/atsuoishimoto/python-raindropio)) to perform some
+bulk operations through a simple command-line interface. However, the API was incomplete didn't
+seem actively supported anymore. Thus, this is a _fork_ and significant extension of
+[python-raindropio](https://github.com/atsuoishimoto/python-raindropio) (ht [Atsuo Ishimoto](https://github.com/atsuoishimoto)).
 
 ## Status
 
@@ -79,14 +83,13 @@ from raindropiopy import API, Collection, CollectionRef, Raindrop
 load_dotenv()
 
 with API(os.environ["RAINDROP_TOKEN"]) as api:
+    print("Current Collections:")
+    for collection in Collection.get_root_collections(api):
+        print(collection.title)
 
- print("Current Collections:")
- for collection in Collection.get_root_collections(api):
-  print(collection.title)
-
- print("\nUnsorted Raindrop Bookmarks):")
- for item in Raindrop.search(api, collection=CollectionRef.Unsorted):
-  print(item.title)
+    print("\nUnsorted Raindrop Bookmarks):")
+    for item in Raindrop.search(api, collection=CollectionRef.Unsorted):
+        print(item.title)
 ```
 
 #### Create a New Raindrop Collection
@@ -104,10 +107,10 @@ from raindropiopy import API, Collection
 load_dotenv()
 
 with API(os.environ["RAINDROP_TOKEN"]) as api:
- title = f"TEST Collection ({getuser()}@{datetime.now():%Y-%m-%dT%H:%M:%S})"
- print(f"Creating collection: '{title}'...", flush=True, end="")
- collection = Collection.create(api, title=title)
- print(f"Done, {collection.id=}.")
+    title = f"TEST Collection ({getuser()}@{datetime.now():%Y-%m-%dT%H:%M:%S})"
+    print(f"Creating collection: '{title}'...", flush=True, end="")
+    collection = Collection.create(api, title=title)
+    print(f"Done, {collection.id=}.")
 ```
 
 (after this has executed, go to your Raindrop.io environment (site or app) and you should see this collection available)
