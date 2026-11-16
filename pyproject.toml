@@ -26,6 +26,7 @@ dev = [
     "vcrpy>=4.2.1,<10",
     "fawltydeps>=0.17.0,<0.21",
     "pytest>=7.4.3,<10",
+    "mypy==2.4.1",
 ]
 
 [tool.ruff]
@@ -153,6 +154,10 @@ shell = """
   set -l release_version (grep "version =" pyproject.toml | head -1 | awk -F'\"' '{print $2}')
   gh release create "$release_version" --title "$release_version"
 """
+
+[tool.mypy]
+files = ["raindropiopy", "tests"]
+explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = ["requests_oauthlib", "vcr"]
