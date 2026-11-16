@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import enum
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import (
     BaseModel,
@@ -23,7 +23,7 @@ from pydantic import (
     model_validator,
 )
 
-from .api import T_API  # ie. for typing only...
+from .api import API
 
 __all__ = [
     "Access",
@@ -127,6 +127,10 @@ class CollectionRef(BaseModel):
 
     id: int | None = Field(None, alias="$id")
 
+    All: ClassVar[CollectionRef]
+    Trash: ClassVar[CollectionRef]
+    Unsorted: ClassVar[CollectionRef]
+
 
 # We define the 3 "system" collections in the Raindrop environment:
 CollectionRef.All = CollectionRef(
@@ -211,7 +215,7 @@ class Collection(BaseModel):
         return _collect_other_attributes(cls, v)
 
     @classmethod
-    def get_root_collections(cls, api: T_API) -> list[Collection]:
+    def get_root_collections(cls, api: API) -> list[Collection]:
         """Get **root** Raindrop collections.
 
         Args:
@@ -227,7 +231,7 @@ class Collection(BaseModel):
     @classmethod
     def create(
         cls,
-        api: T_API,
+        api: API,
         title: str,
         cover: list[str] | None = None,
         expanded: bool | None = None,
@@ -279,7 +283,7 @@ class Collection(BaseModel):
         return cls(**item)
 
     @classmethod
-    def get_or_create(cls, api: T_API, title: str) -> Collection:
+    def get_or_create(cls, api: API, title: str) -> Collection:
         """Get a Raindrop collection based on it's **title**, if it doesn't exist, create it.
 
         Args:
@@ -386,9 +390,9 @@ class Raindrop(BaseModel):
     @classmethod
     def update(
         cls,
-        api: T_API,
+        api: API,
         id: int,
-        collection: (Collection | CollectionRef, int) | None = None,
+        collection: Collection | CollectionRef | int | None = None,
         cover: str | None = None,
         excerpt: str | None = None,
         important: bool | None = None,
@@ -465,8 +469,8 @@ class Raindrop(BaseModel):
     @classmethod
     def _search_paged(
         cls,
-        api: T_API,
-        collection: CollectionRef = CollectionRef.All,
+        api: API,
+        collection: Collection | CollectionRef = CollectionRef.All,
         search: str | None = None,
         page: int = 0,
         perpage: int = 50,
@@ -477,7 +481,7 @@ class Raindrop(BaseModel):
         search reflecting paging (while the primary ``search`` method below hides it
         completely).
         """
-        params = {"perpage": perpage, "page": page}
+        params: dict[str, int | str] = {"perpage": perpage, "page": page}
         if search:
             params["search"] = search
         url = URL.format(path=f"raindrops/{collection.id}")
@@ -487,7 +491,7 @@ class Raindrop(BaseModel):
     @classmethod
     def search(
         cls,
-        api: T_API,
+        api: API,
         collection: Collection | CollectionRef = CollectionRef.All,
         search: str | None = None,
     ) -> list[Raindrop]:

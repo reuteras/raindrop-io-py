@@ -153,3 +153,7 @@ shell = """
   set -l release_version (grep "version =" pyproject.toml | head -1 | awk -F'\"' '{print $2}')
   gh release create "$release_version" --title "$release_version"
 """
+
+[[tool.mypy.overrides]]
+module = ["requests_oauthlib", "vcr"]
+ignore_missing_imports = true

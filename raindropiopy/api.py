@@ -7,7 +7,7 @@ abstraction layer for calls available for the Core Classes, ie. Collection, Rain
 import datetime
 import enum
 import json
-from typing import Any, Final, TypeVar
+from typing import Any, Final, Self
 
 import requests
 from requests_oauthlib import OAuth2Session
@@ -18,15 +18,12 @@ URL_AUTHORIZE: Final = "https://raindrop.io/oauth/authorize"
 URL_ACCESS_TOKEN: Final = "https://raindrop.io/oauth/access_token"
 URL_REFRESH: Final = "https://raindrop.io/oauth/access_token"
 
-# In py3.11, we'll be able to do 'from typing import Self' instead
-T_API = TypeVar("T_API")
-
 
 class API:
     """Provides communication to the Raindrop.io API server.
 
     Parameters:
-        token: Either a string representing a valid RaindropIO Token.
+        token: Either a string representing a valid RaindropIO Token, or an OAuth token dict.
             This is either a TEST_TOKEN or a CLIENT token for use in OAuth in
             which case the client_id and client_secret must also be provided.
 
@@ -48,7 +45,7 @@ class API:
 
     def __init__(
         self,
-        token: str,
+        token: str | dict[str, Any],
         client_id: str | None = None,
         client_secret: str | None = None,
         token_type: str = "Bearer",
@@ -207,7 +204,7 @@ class API:
         self._on_resp(ret)
         return ret
 
-    def __enter__(self) -> T_API:  # Note: Py3.11 upgrade to "self"
+    def __enter__(self) -> Self:
         """Context manager use: if we don't have an active session open yet, open one!."""
         if not self.session:
             self.open()

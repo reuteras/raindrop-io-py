@@ -2,13 +2,14 @@
 
 import datetime
 import json
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
 
 from raindropiopy import AccessLevel, Collection, View
 
-COLLECTION = {
+COLLECTION: dict[str, Any] = {
     "_id": 1000,
     "access": {"draggable": True, "for": 10000, "level": 4, "root": False},
     "author": True,
@@ -43,6 +44,7 @@ def test_get_root_collections(mock_api) -> None:
         collection = collections[0]
 
         assert collection.id == 1000
+        assert collection.access is not None
         assert collection.access.level == AccessLevel.owner
         assert collection.access.draggable is True
         assert collection.collaborators == []
@@ -78,7 +80,7 @@ def test_get_root_collections(mock_api) -> None:
 
 def test_parent_dereferencing() -> None:
     """Test that we can correct 'de-reference' a parent."""
-    base = {
+    base: dict[str, Any] = {
         "_id": 1001,
         "access": {"draggable": True, "for": 10000, "level": 4, "root": False},
         "author": True,
